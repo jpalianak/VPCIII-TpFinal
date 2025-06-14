@@ -1,0 +1,7 @@
+torch==2.7.0
+transformers==4.31.0
+scikit-learn==1.6.1
+datasets==3.6.0
+matplotlib==3.10.1
+streamlit==1.45.1
+pillow==11.2.1
