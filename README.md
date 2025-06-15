@@ -57,22 +57,39 @@ pip install -r requirements.txt
 ```
 <br>
 
-## 🧠 Entrenamiento
+## 🧠 Entrenamiento y evaluación
 Para entrenar el modelo:
 
 ```text 
 python main.py train
 ```
-Esto entrenará un modelo ViT por 10 épocas con parámetros definidos en train.py. Los checkpoints se guardarán en ./outputs/checkpoints.
+Esto entrenará un modelo ViT con parámetros definidos en train.py. Los checkpoints se guardarán en ./outputs/checkpoints.
 <br><br>
 
-## ✅ Evaluación
-Para evaluar el modelo entrenado:
+## ✅ Testeo
+Para testear el modelo:
 
 ```text 
 python main.py evaluate
 ```
-Este comando evalúa el modelo sobre el conjunto de validación y reporta métricas como eval_accuracy y eval_loss.
+Este comando evalúa el modelo sobre el conjunto de test y reporta métricas como eval_accuracy y eval_loss.
+<br><br>
+
+## 📊 Registro de entrenamiento con MLflow
+El proyecto utiliza MLflow para registrar automáticamente parámetros, métricas y modelos durante el entrenamiento. Esto permite seguir la evolución del desempeño y guardar los checkpoints de manera organizada.
+
+Para visualizar los experimentos, ejecutar:
+
+```text
+mlflow ui
+```
+Abrir en el navegador:
+
+```text
+http://localhost:5000
+```
+Allí se pueden comparar métricas como pérdida y accuracy por época y descargar los modelos guardados.
+El registro está integrado en el pipeline de entrenamiento, sin configuraciones adicionales.
 <br><br>
 
 ## 🌐 Interfaz Streamlit
