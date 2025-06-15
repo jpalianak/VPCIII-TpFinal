@@ -14,6 +14,7 @@ Hugging Face transformers y datasets<br>
 PIL (Python Imaging Library)<br>
 Streamlit para inferencia web<br>
 scikit-learn para métricas<br>
+MlFlow para seguimiento de experimentos y registro de modelos <br>
 <br>
 
 ## 🗂️ Estructura del proyecto
