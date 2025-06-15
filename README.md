@@ -61,22 +61,22 @@ pip install -r requirements.txt
 ```
 <br>
 
-## 🧠 Entrenamiento y evaluación
+## 🧠 Entrenamiento y validación
 Para entrenar el modelo:
 
 ```text 
 python main.py train
 ```
-Esto entrenará un modelo ViT con parámetros definidos en train.py. Los checkpoints se guardarán en ./outputs/checkpoints.
+Esto entrenará un modelo ViT con parámetros definidos en train.py sobre el conjunto de train y validation. Los checkpoints se guardarán en ./outputs/checkpoints.
 <br><br>
 
-## ✅ Testeo
+## ✅ Test
 Para testear el modelo:
 
 ```text 
 python main.py evaluate
 ```
-Este comando evalúa el modelo sobre el conjunto de test y reporta métricas como eval_accuracy y eval_loss.
+Este comando evalúa el modelo sobre el conjunto de test.
 <br><br>
 
 ## 📊 Registro de entrenamiento con MLflow
