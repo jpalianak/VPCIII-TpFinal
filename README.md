@@ -8,7 +8,7 @@ Desarrollar un clasificador de imágenes capaz de detectar defectos comunes en s
 
 ## 🧰 Tecnologías utilizadas
 
-Python 3.10<br>
+Python 3.11<br>
 PyTorch<br>
 Hugging Face transformers y datasets<br>
 PIL (Python Imaging Library)<br>
@@ -28,7 +28,8 @@ MlFlow para seguimiento de experimentos y registro de modelos <br>
 │   └── logger.py           # Funciones para imprimir los logs
 ├── outputs/
 │   ├── checkpoints/        # Pesos del modelo entrenado
-│   └── final_model/        # Modelo final entrenado
+│   │   └── final_model/    # Modelo final entrenado
+│   └── logs/               # Logs de información
 ├── models/                 # Modelos descargado o referenciado
 ├── data/                   # Dataset descargado o referenciado
 ├── docs/                   # Documentacion (presentación, documentación, etc)
