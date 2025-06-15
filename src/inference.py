@@ -2,24 +2,37 @@ import streamlit as st
 from PIL import Image
 import torch
 from transformers import ViTForImageClassification, ViTImageProcessor
+import warnings
+from src.logger import get_logger
+
+warnings.filterwarnings("ignore")
 
 
 def run_inference(image_path):
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    logger = get_logger()
+    try:
+        logger.info(f"Inferir imagen: {image_path}")
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-    model = ViTForImageClassification.from_pretrained(
-        "./outputs/checkpoints/final_model").to(device)
-    processor = ViTImageProcessor.from_pretrained(
-        "./outputs/checkpoints/final_model")
+        model = ViTForImageClassification.from_pretrained(
+            "./outputs/checkpoints/final_model").to(device)
+        processor = ViTImageProcessor.from_pretrained(
+            "./outputs/checkpoints/final_model")
 
-    image = Image.open(image_path).convert("RGB")
-    inputs = processor(images=image, return_tensors="pt").to(device)
+        image = Image.open(image_path).convert("RGB")
+        inputs = processor(images=image, return_tensors="pt").to(device)
 
-    with torch.no_grad():
-        outputs = model(**inputs)
-        prediction = torch.argmax(outputs.logits, dim=1).item()
+        with torch.no_grad():
+            outputs = model(**inputs)
+            prediction = torch.argmax(outputs.logits, dim=1).item()
 
-    return prediction
+        logger.info(f"Predicción obtenida: {prediction}")
+        return prediction
+
+    except Exception as e:
+        logger.exception(f"Error durante la inferencia: {e}")
+        print(f"Error durante la inferencia: {e}")
+        return None
 
 
 id2label = {
@@ -42,16 +55,21 @@ def run_app():
         "Subí una imagen para clasificar", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
-        # Guardar temporalmente para pasar path a run_inference
-        with open("temp_image.jpg", "wb") as f:
-            f.write(uploaded_file.getbuffer())
+        try:
+            # Guardar temporalmente para pasar path a run_inference
+            with open("temp_image.jpg", "wb") as f:
+                f.write(uploaded_file.getbuffer())
 
-        st.image(uploaded_file, caption="Imagen cargada",
-                 use_container_width=True)
+            st.image(uploaded_file, caption="Imagen cargada",
+                     use_container_width=True)
 
-        # Ejecutar inferencia
-        label_idx = run_inference("temp_image.jpg")
-        st.write(f"Predicción: **{id2label[label_idx]}**")
+            # Ejecutar inferencia
+            label_idx = run_inference("temp_image.jpg")
+            st.write(f"Predicción: **{id2label[label_idx]}**")
+
+        except Exception as e:
+            logger.exception(f"Error en la app Streamlit: {e}")
+            st.error(f"Error durante la clasificación: {e}")
 
 
 if __name__ == "__main__":

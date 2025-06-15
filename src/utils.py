@@ -3,6 +3,8 @@ from sklearn.metrics import accuracy_score
 from datasets import load_dataset, DatasetDict
 import os
 from transformers import ViTForImageClassification, ViTImageProcessor
+import torch.nn as nn
+from src.logger import get_logger
 
 # Etiquetas
 label2id = {
@@ -45,15 +47,16 @@ def compute_metrics(eval_pred):
 
 
 def get_or_prepare_dataset(data_dir="data/wood_surface_defects_split"):
+    logger = get_logger()
     if os.path.exists(data_dir):
-        print(f"Cargando dataset desde disco en {data_dir}...")
+        logger.info(f"Cargando dataset desde disco en {data_dir}...")
         dataset = DatasetDict.load_from_disk(data_dir)
         # Reducir el dataset para probar y entrenar mas rapido
-        dataset['train'] = dataset['train'].select(range(300))
-        dataset['validation'] = dataset['validation'].select(range(30))
-        dataset['test'] = dataset['test'].select(range(30))
+        dataset['train'] = dataset['train'].select(range(50))
+        dataset['validation'] = dataset['validation'].select(range(5))
+        dataset['test'] = dataset['test'].select(range(5))
     else:
-        print("Descargando dataset de Hugging Face y creando splits...")
+        logger.info("Descargando dataset de Hugging Face y creando splits...")
         full_dataset = load_dataset("iluvvatar/wood_surface_defects")["train"]
 
         # Dividir 80% train, 10% val, 10% test
@@ -66,19 +69,21 @@ def get_or_prepare_dataset(data_dir="data/wood_surface_defects_split"):
             "test": val_test['test']
         })
 
-        print(f"Guardando dataset dividido en {data_dir} para uso futuro...")
+        logger.info(
+            f"Guardando dataset dividido en {data_dir} para uso futuro...")
         dataset.save_to_disk(data_dir)
 
     return dataset
 
 
 def get_or_download_model(model_dir="./models/vit", num_labels=9):
+    logger = get_logger()
     if os.path.exists(model_dir) and os.path.isfile(os.path.join(model_dir, "config.json")):
-        print(f"Cargando modelo desde disco en {model_dir}...")
+        logger.info(f"Cargando modelo desde disco en {model_dir}...")
         model = ViTForImageClassification.from_pretrained(
             model_dir, num_labels=num_labels, ignore_mismatched_sizes=True)
     else:
-        print(
+        logger.info(
             f"Descargando modelo desde Hugging Face y guardando en {model_dir}...")
         model = ViTForImageClassification.from_pretrained(
             "google/vit-base-patch16-224",
@@ -93,11 +98,12 @@ def get_or_download_model(model_dir="./models/vit", num_labels=9):
 
 
 def get_or_download_processor(processor_dir="./models/vit"):
+    logger = get_logger()
     if os.path.exists(processor_dir) and os.path.isfile(os.path.join(processor_dir, "preprocessor_config.json")):
-        print(f"Cargando processor desde disco en {processor_dir}...")
+        logger.info(f"Cargando processor desde disco en {processor_dir}...")
         processor = ViTImageProcessor.from_pretrained(processor_dir)
     else:
-        print(
+        logger.info(
             f"Descargando processor desde Hugging Face y guardando en {processor_dir}...")
         processor = ViTImageProcessor.from_pretrained(
             "google/vit-base-patch16-224",
@@ -106,3 +112,12 @@ def get_or_download_processor(processor_dir="./models/vit"):
         processor.save_pretrained(processor_dir)
 
     return processor
+
+
+class WrappedViTModel(nn.Module):
+    def __init__(self, model):
+        super(WrappedViTModel, self).__init__()
+        self.model = model
+
+    def forward(self, x):
+        return self.model(x).logits
