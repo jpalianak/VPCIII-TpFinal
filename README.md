@@ -23,13 +23,15 @@ scikit-learn para métricas<br>
 │   ├── train.py            # Funciones de entrenamiento y evaluación
 │   ├── utils.py            # Funciones auxiliares
 │   ├── inference.py        # Interfaz web con Streamlit para clasificación
-│   └── evaluate.py         # Funciones para evaluar en test
+│   ├── evaluate.py         # Funciones para evaluar en test
+│   └── logger.py           # Funciones para imprimir los logs
 ├── outputs/
 │   ├── checkpoints/        # Pesos del modelo entrenado
 │   └── final_model/        # Modelo final entrenado
 ├── models/                 # Modelos descargado o referenciado
 ├── data/                   # Dataset descargado o referenciado
 ├── docs/                   # Documentacion (presentación, documentación, etc)
+├── mlruns/                 # Carpeta de MlFlow donde almacena los resultados de los entrenamientos
 └── README.md               # Este archivo
 ```
 <br>
