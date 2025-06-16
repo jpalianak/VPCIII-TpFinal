@@ -5,6 +5,8 @@ import os
 from transformers import ViTForImageClassification, ViTImageProcessor
 import torch.nn as nn
 from src.logger import get_logger
+import subprocess
+
 
 # Etiquetas
 label2id = {
@@ -21,6 +23,7 @@ label2id = {
     "Normal": 10
 }
 
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 def transform_example(example, processor):
     inputs = processor(images=example['image'], return_tensors="pt")
@@ -46,7 +49,7 @@ def compute_metrics(eval_pred):
     return {"accuracy": acc}
 
 
-def get_or_prepare_dataset(data_dir="data/wood_surface_defects_split"):
+def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_split"):
     logger = get_logger()
     if os.path.exists(data_dir):
         logger.info(f"Cargando dataset desde disco en {data_dir}...")
@@ -121,3 +124,17 @@ class WrappedViTModel(nn.Module):
 
     def forward(self, x):
         return self.model(x).logits
+
+
+
+def run_jupyter_server():
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    print(project_root)
+    subprocess.run([
+        'jupyter', 
+        'lab', 
+        '--ip=0.0.0.0', 
+        '--port=9999', 
+        '--no-browser',
+        f'--notebook-dir={project_root}'
+    ])
