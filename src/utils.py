@@ -6,6 +6,8 @@ from transformers import ViTForImageClassification, ViTImageProcessor
 import torch.nn as nn
 from src.logger import get_logger
 import subprocess
+from collections import Counter
+
 
 
 # Etiquetas
@@ -138,3 +140,12 @@ def run_jupyter_server():
         '--no-browser',
         f'--notebook-dir={project_root}'
     ])
+
+
+def assign_main_label_for_eda(sample):
+    if not sample["objects"]:
+        label_str = "Normal"
+    else:
+        labels = [obj["label"] for obj in sample["objects"]]
+        label_str = Counter(labels).most_common(1)[0][0] #escoge el mas frecuente
+    return {"labels": label2id[label_str]}
