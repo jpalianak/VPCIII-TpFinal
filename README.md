@@ -8,12 +8,13 @@ Desarrollar un clasificador de imágenes capaz de detectar defectos comunes en s
 
 ## 🧰 Tecnologías utilizadas
 
-Python 3.10<br>
+Python 3.11<br>
 PyTorch<br>
 Hugging Face transformers y datasets<br>
 PIL (Python Imaging Library)<br>
 Streamlit para inferencia web<br>
 scikit-learn para métricas<br>
+MlFlow para seguimiento de experimentos y registro de modelos <br>
 <br>
 
 ## 🗂️ Estructura del proyecto
@@ -23,13 +24,16 @@ scikit-learn para métricas<br>
 │   ├── train.py            # Funciones de entrenamiento y evaluación
 │   ├── utils.py            # Funciones auxiliares
 │   ├── inference.py        # Interfaz web con Streamlit para clasificación
-│   └── evaluate.py         # Funciones para evaluar en test
+│   ├── evaluate.py         # Funciones para evaluar en test
+│   └── logger.py           # Funciones para imprimir los logs
 ├── outputs/
 │   ├── checkpoints/        # Pesos del modelo entrenado
-│   └── final_model/        # Modelo final entrenado
+│   │   └── final_model/    # Modelo final entrenado
+│   └── logs/               # Logs de información
 ├── models/                 # Modelos descargado o referenciado
 ├── data/                   # Dataset descargado o referenciado
 ├── docs/                   # Documentacion (presentación, documentación, etc)
+├── mlruns/                 # Carpeta de MlFlow donde almacena los resultados de los entrenamientos
 └── README.md               # Este archivo
 ```
 <br>
@@ -57,22 +61,39 @@ pip install -r requirements.txt
 ```
 <br>
 
-## 🧠 Entrenamiento
+## 🧠 Entrenamiento y validación
 Para entrenar el modelo:
 
 ```text 
 python main.py train
 ```
-Esto entrenará un modelo ViT por 10 épocas con parámetros definidos en train.py. Los checkpoints se guardarán en ./outputs/checkpoints.
+Esto entrenará un modelo ViT con parámetros definidos en train.py sobre el conjunto de train y validation. Los checkpoints se guardarán en ./outputs/checkpoints.
 <br><br>
 
-## ✅ Evaluación
-Para evaluar el modelo entrenado:
+## ✅ Test
+Para testear el modelo:
 
 ```text 
 python main.py evaluate
 ```
-Este comando evalúa el modelo sobre el conjunto de validación y reporta métricas como eval_accuracy y eval_loss.
+Este comando evalúa el modelo sobre el conjunto de test.
+<br><br>
+
+## 📊 Registro de entrenamiento con MLflow
+El proyecto utiliza MLflow para registrar automáticamente parámetros, métricas y modelos durante el entrenamiento. Esto permite seguir la evolución del desempeño y guardar los checkpoints de manera organizada.
+
+Para visualizar los experimentos, ejecutar:
+
+```text
+mlflow ui
+```
+Abrir en el navegador:
+
+```text
+http://localhost:5000
+```
+Allí se pueden comparar métricas como pérdida y accuracy por época y descargar los modelos guardados.
+El registro está integrado en el pipeline de entrenamiento, sin configuraciones adicionales.
 <br><br>
 
 ## 🌐 Interfaz Streamlit
