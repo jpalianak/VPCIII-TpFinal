@@ -52,9 +52,9 @@ def get_or_prepare_dataset(data_dir="data/wood_surface_defects_split"):
         logger.info(f"Cargando dataset desde disco en {data_dir}...")
         dataset = DatasetDict.load_from_disk(data_dir)
         # Reducir el dataset para probar y entrenar mas rapido
-        dataset['train'] = dataset['train'].select(range(50))
-        dataset['validation'] = dataset['validation'].select(range(5))
-        dataset['test'] = dataset['test'].select(range(5))
+        dataset['train'] = dataset['train'].select(range(1000))
+        dataset['validation'] = dataset['validation'].select(range(100))
+        dataset['test'] = dataset['test'].select(range(100))
     else:
         logger.info("Descargando dataset de Hugging Face y creando splits...")
         full_dataset = load_dataset("iluvvatar/wood_surface_defects")["train"]

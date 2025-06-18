@@ -5,6 +5,7 @@ import warnings
 import mlflow
 import numpy as np
 from src.logger import get_logger
+import os
 
 warnings.filterwarnings("ignore")
 
@@ -12,8 +13,9 @@ warnings.filterwarnings("ignore")
 def run_training():
     logger = get_logger()
     try:
-        logger.info("Inicio del entrenamiento")
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        logger.info(
+            f"Inicio del entrenamiento en dispositivo: {device.upper()} ({device})")
 
         dataset = get_or_prepare_dataset()
         logger.info("Dataset cargado/preparado")
@@ -35,16 +37,18 @@ def run_training():
             evaluation_strategy="epoch",
             logging_strategy="epoch",
             logging_first_step=True,
-            learning_rate=2e-5,
-            per_device_train_batch_size=16,
-            per_device_eval_batch_size=16,
-            num_train_epochs=5,
+            learning_rate=3e-5,
+            per_device_train_batch_size=8,
+            per_device_eval_batch_size=8,
+            num_train_epochs=50,
             weight_decay=0.01,
             logging_dir="./outputs/logs",
             fp16=True if device == 'cuda' else False,
             dataloader_pin_memory=True if device == 'cuda' else False,
             report_to="mlflow",
-            optim="adamw_torch"
+            optim="adamw_torch",
+            save_strategy="epoch",
+            save_total_limit=2
         )
         logger.info("Configuración de entrenamiento creada")
 
@@ -69,7 +73,25 @@ def run_training():
             })
 
             logger.info("Entrenando el modelo...")
-            trainer.train()
+
+            # Buscar último checkpoint (si existe)
+            last_checkpoint = None
+            if os.path.isdir(training_args.output_dir):
+                checkpoints = [
+                    os.path.join(training_args.output_dir, d)
+                    for d in os.listdir(training_args.output_dir)
+                    if d.startswith("checkpoint-")
+                ]
+                if checkpoints:
+                    last_checkpoint = max(checkpoints, key=os.path.getmtime)
+                    logger.info(
+                        f"Reanudando desde el checkpoint: {last_checkpoint}")
+                else:
+                    logger.info(
+                        "No se encontró checkpoint previo. Entrenando desde cero.")
+
+            # Entrenamiento (continúa desde el último checkpoint si lo hay)
+            trainer.train(resume_from_checkpoint=last_checkpoint)
 
             # Evaluar en validación
             eval_metrics = trainer.evaluate()
