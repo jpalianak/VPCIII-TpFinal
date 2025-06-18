@@ -13,7 +13,7 @@ def run_training():
     logger = get_logger()
     try:
         logger.info("Inicio del entrenamiento")
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        device = device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
 
         dataset = get_or_prepare_dataset()
         logger.info("Dataset cargado/preparado")

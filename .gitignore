@@ -6,3 +6,5 @@ outputs/*
 !outputs/.gitkeep
 mlruns/*
 !mlruns/.gitkeep
+__pycache__/
+.DS_Store
