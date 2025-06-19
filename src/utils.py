@@ -7,6 +7,8 @@ import torch.nn as nn
 from src.logger import get_logger
 import subprocess
 from collections import Counter
+import evaluate
+
 
 
 
@@ -24,6 +26,13 @@ label2id = {
     "overgrown": 9,
     "Normal": 10
 }
+
+
+#cargar métricas
+accuracy = evaluate.load("accuracy")
+precision = evaluate.load("precision")
+recall = evaluate.load("recall")
+f1 = evaluate.load("f1")
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -43,12 +52,17 @@ def transform_example(example, processor):
         'labels': label_id
     }
 
-
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     preds = np.argmax(logits, axis=1)
     acc = accuracy_score(labels, preds)
-    return {"accuracy": acc}
+    # return {"accuracy": acc}
+    return {
+        "accuracy": accuracy.compute(predictions=preds, references=labels)["accuracy"],
+        "precision": precision.compute(predictions=preds, references=labels, average="weighted")["precision"],
+        "recall": recall.compute(predictions=preds, references=labels, average="weighted")["recall"],
+        "f1": f1.compute(predictions=preds, references=labels, average="weighted")["f1"],
+    }
 
 
 def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_split"):
@@ -56,10 +70,11 @@ def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_s
     if os.path.exists(data_dir):
         logger.info(f"Cargando dataset desde disco en {data_dir}...")
         dataset = DatasetDict.load_from_disk(data_dir)
+
         # Reducir el dataset para probar y entrenar mas rapido
-        dataset['train'] = dataset['train'].select(range(50))
-        dataset['validation'] = dataset['validation'].select(range(5))
-        dataset['test'] = dataset['test'].select(range(5))
+        dataset['train'] = dataset['train'].select(range(700))
+        dataset['validation'] = dataset['validation'].select(range(655))
+        dataset['test'] = dataset['test'].select(range(655))
     else:
         logger.info("Descargando dataset de Hugging Face y creando splits...")
         full_dataset = load_dataset("iluvvatar/wood_surface_defects")["train"]

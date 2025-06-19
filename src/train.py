@@ -73,7 +73,10 @@ def run_training():
 
             # Evaluar en validación
             eval_metrics = trainer.evaluate()
-            mlflow.log_metrics(eval_metrics)
+            for k, v in eval_metrics.items():
+                mlflow.log_metric(k, v)
+            # eval_metrics = trainer.evaluate()
+            # mlflow.log_metrics(eval_metrics)
 
             # Guardar modelo y processor como artefactos
             model_path = "./outputs/checkpoints/final_model"
