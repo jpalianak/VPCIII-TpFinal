@@ -72,7 +72,7 @@ def compute_metrics(eval_pred):
     }
 
 
-'''
+
 def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_split"):
     logger = get_logger()
     if os.path.exists(data_dir):
@@ -103,9 +103,9 @@ def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_s
         dataset.save_to_disk(data_dir)
 
     return dataset
+
+
 '''
-
-
 def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_split", max_per_class=80):
     logger = get_logger()
 
@@ -159,8 +159,7 @@ def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_s
         dataset.save_to_disk(data_dir)
 
     return dataset
-
-
+'''
 def get_or_download_model(model_dir="./models/vit", num_labels=9):
     logger = get_logger()
     if os.path.exists(model_dir) and os.path.isfile(os.path.join(model_dir, "config.json")):
