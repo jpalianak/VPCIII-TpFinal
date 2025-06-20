@@ -64,7 +64,7 @@ def compute_metrics(eval_pred):
         "f1": f1.compute(predictions=preds, references=labels, average="weighted")["f1"],
     }
 
-
+'''
 def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_split"):
     logger = get_logger()
     if os.path.exists(data_dir):
@@ -94,7 +94,61 @@ def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_s
         dataset.save_to_disk(data_dir)
 
     return dataset
+'''
 
+def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_split", max_per_class=80):
+    logger = get_logger()
+
+    if os.path.exists(data_dir):
+        logger.info(f"Cargando dataset desde disco en {data_dir}...")
+        dataset = DatasetDict.load_from_disk(data_dir)
+    else:
+        logger.info(
+            "Descargando dataset de Hugging Face y creando splits balanceados...")
+        full_dataset = load_dataset("iluvvatar/wood_surface_defects")["train"]
+
+        # Agrupar índices por clase usando la primera etiqueta de cada imagen
+        class_indices = defaultdict(list)
+        for idx, example in enumerate(full_dataset):
+            if example['objects']:
+                label = example['objects'][0]['label']
+                class_indices[label].append(idx)
+
+        # Filtrar clases que tengan al menos max_per_class imágenes
+        filtered_class_indices = {
+            label: indices for label, indices in class_indices.items()
+            if len(indices) >= max_per_class
+        }
+
+        logger.info(
+            f"Se conservaron {len(filtered_class_indices)} clases con al menos {max_per_class} imágenes")
+
+        # Seleccionar hasta max_per_class imágenes por clase
+        selected_indices = []
+        for label, indices in filtered_class_indices.items():
+            random.shuffle(indices)
+            selected = indices[:max_per_class]
+            selected_indices.extend(selected)
+            logger.info(f"{label}: {len(selected)} imágenes seleccionadas")
+
+        # Crear dataset balanceado
+        balanced_dataset = full_dataset.select(selected_indices)
+
+        # Dividir: 80% train, 10% val, 10% test
+        train_val = balanced_dataset.train_test_split(test_size=0.2, seed=42)
+        val_test = train_val["test"].train_test_split(test_size=0.5, seed=42)
+
+        dataset = DatasetDict({
+            "train": train_val["train"],
+            "validation": val_test["train"],
+            "test": val_test["test"]
+        })
+
+        logger.info(
+            f"Guardando dataset dividido en {data_dir} para uso futuro...")
+        dataset.save_to_disk(data_dir)
+
+    return dataset
 
 def get_or_download_model(model_dir="./models/vit", num_labels=9):
     logger = get_logger()
