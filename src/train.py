@@ -13,9 +13,9 @@ warnings.filterwarnings("ignore")
 def run_training():
     logger = get_logger()
     try:
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        logger.info(
-            f"Inicio del entrenamiento en dispositivo: {device.upper()} ({device})")
+        logger.info("Inicio del entrenamiento")
+        device = device = 'cuda' if torch.cuda.is_available(
+        ) else 'mps' if torch.backends.mps.is_available() else 'cpu'
 
         dataset = get_or_prepare_dataset()
         logger.info("Dataset cargado/preparado")
@@ -95,7 +95,10 @@ def run_training():
 
             # Evaluar en validación
             eval_metrics = trainer.evaluate()
-            mlflow.log_metrics(eval_metrics)
+            for k, v in eval_metrics.items():
+                mlflow.log_metric(k, v)
+            # eval_metrics = trainer.evaluate()
+            # mlflow.log_metrics(eval_metrics)
 
             # Guardar modelo y processor como artefactos
             model_path = "./outputs/checkpoints/final_model"

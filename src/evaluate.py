@@ -24,7 +24,6 @@ def run_evaluation():
         # Cargamos el dataset
         dataset = get_or_prepare_dataset()
         logger.info("Dataset cargado/preparado")
-
         # Preprocesar datasets
         dataset = dataset.map(lambda x: transform_example(
             x, processor), batched=False, num_proc=4, remove_columns=dataset["train"].column_names)
@@ -38,7 +37,8 @@ def run_evaluation():
         logger.info("Dataloader creado para dataset de test")
 
         model.eval()
-        model.to('cuda' if torch.cuda.is_available() else 'cpu')
+        device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+        model.to(device)
         logger.info(f"Modelo configurado en dispositivo: {model.device}")
 
         all_preds = []

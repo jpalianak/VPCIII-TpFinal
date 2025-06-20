@@ -6,10 +6,9 @@ import warnings
 from src.logger import get_logger
 
 warnings.filterwarnings("ignore")
-
+logger = get_logger()
 
 def run_inference(image_path):
-    logger = get_logger()
     try:
         logger.info(f"Inferir imagen: {image_path}")
         device = 'cuda' if torch.cuda.is_available() else 'cpu'

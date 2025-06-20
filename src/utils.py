@@ -74,6 +74,7 @@ def get_or_prepare_dataset(data_dir=f"{project_root}/data/wood_surface_defects_s
         logger.info(f"Cargando dataset desde disco en {data_dir}...")
         dataset = DatasetDict.load_from_disk(data_dir)
 
+
         # Reducir el dataset para probar y entrenar mas rapido
         # dataset['train'] = dataset['train'].select(range(700))
         # dataset['validation'] = dataset['validation'].select(range(655))
