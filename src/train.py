@@ -1,6 +1,6 @@
 import torch
 from transformers import TrainingArguments, Trainer
-from src.utils import transform_example, compute_metrics, get_or_prepare_dataset, get_or_download_model, get_or_download_processor, WrappedViTModel
+from src.utils import transform_example, compute_metrics, get_or_prepare_dataset, get_or_download_model, get_or_download_processor, WrappedViTModel, apply_oversample
 import warnings
 import mlflow
 import numpy as np
@@ -20,6 +20,8 @@ def run_training():
         dataset = get_or_prepare_dataset()
         logger.info("Dataset cargado/preparado")
 
+        balanced_train = apply_oversample(dataset["train"], label_key="labels",target_size=150)
+        dataset["train"] = balanced_train
         processor = get_or_download_processor(processor_dir="./models/vit")
         logger.info("Processor cargado/preparado")
 
@@ -28,10 +30,9 @@ def run_training():
 
         # Preprocesar datasets
         dataset = dataset.map(lambda x: transform_example(
-            x, processor), batched=False, num_proc=4, remove_columns=dataset["train"].column_names)
+            x, processor), batched=False, num_proc=4, remove_columns=['id', 'image', 'objects'])
         dataset.set_format(type='torch', columns=['pixel_values', 'labels'])
         logger.info("Dataset preprocesado")
-
         training_args = TrainingArguments(
             output_dir="./outputs/checkpoints",
             evaluation_strategy="epoch",

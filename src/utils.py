@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics import accuracy_score
-from datasets import load_dataset, DatasetDict
+from datasets import load_dataset, DatasetDict, Dataset
 import os
 from transformers import ViTForImageClassification, ViTImageProcessor
 import torch.nn as nn
@@ -10,6 +10,11 @@ from collections import Counter
 import evaluate
 from collections import defaultdict
 import random
+from collections import defaultdict, Counter
+
+
+
+
 
 
 # Etiquetas
@@ -216,6 +221,11 @@ def run_jupyter_server():
         f'--notebook-dir={project_root}'
     ])
 
+def get_most_representative_label(sample):
+    labels = [obj["label"] for obj in sample["objects"]]
+    label_str = Counter(labels).most_common(1)[0][0] #escoge el mas frecuente
+    return label_str
+
 
 def assign_main_label_for_eda(sample):
     if not sample["objects"]:
@@ -225,3 +235,25 @@ def assign_main_label_for_eda(sample):
         label_str = Counter(labels).most_common(
             1)[0][0]  # escoge el mas frecuente
     return {"labels": label2id[label_str]}
+
+    
+
+def apply_oversample(dataset: Dataset,label_key: str, target_size: int) -> DatasetDict:
+    """
+    Oversample minority class using simple duplication
+    """
+    dataset = dataset.map(
+        lambda example: {
+        "labels": label2id[example["objects"][0]["label"]] if example["objects"] else label2id["Normal"]
+    })
+    dataset.set_format(type='python') 
+    label_to_examples = defaultdict(list)
+    for i, example in enumerate(dataset):
+        label_to_examples[example[label_key]].append(example)
+    
+    oversampled_examples = []
+    for label, examples in label_to_examples.items():
+        multiplier = max(1, target_size // len(examples))
+        oversampled_examples.extend(examples * multiplier)
+    return Dataset.from_list(oversampled_examples)
+    
