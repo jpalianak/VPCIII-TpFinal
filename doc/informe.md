@@ -145,7 +145,7 @@ Los pasos clave del *pipeline* de entrenamiento fueron:
   función para agrupar los datos en lotes (*batches*), apilando los
   valores de píxeles y las etiquetas para que el modelo pudiera
   procesarlos eficientemente.
-- **Métrica de evaluación:** Se utilizó la métrica de *accuracy* de la
+- **Métrica de evaluación:** Se utilizaron las métricas de *accuracy*, *F1-score* y *presición* de la
   biblioteca evaluate para monitorear el rendimiento del modelo durante
   el *fine-tuning*.
 - **Configuración del Trainer:** La clase **Trainer** de Hugging Face,
@@ -278,12 +278,34 @@ entrenamiento y validación. Estas curvas permiten:
 - Determinar el punto óptimo de entrenamiento antes de que el modelo
   comience a memorizar el conjunto de entrenamiento.
 
+![accuracy_exp_1](images/accuracy_exp_1.png)
+*Accuracy experimento 1*
+
+![accuracy_exp_2](images/accuracy_exp_2.png)
+*Accuracy experimento 2*
+
+![fi_score_exp1](images/fi_score_exp1.png)
+*F1-score experimento 1*
+
+![fi_score_exp2](images/f1_score_exp2.png)
+*F1-score experimento 2*
+
+![presicion_exp1](images/presicion_exp1.png)
+*Presición experimento 1*
+
+![presicion_exp2](images/precision_exp2.png)
+*Presición experimento 2*
+
 ### 4.3. Eficiencia Computacional
 
 Se reporta la **velocidad de inferencia (throughput)** del modelo
 (imágenes por segundo) en el hardware utilizado, así como el **tiempo
 total de entrenamiento**. Esto es crucial para evaluar la viabilidad de
 la solución en un entorno de producción en tiempo real.
+
+**Experimento 1: 24.1 min**
+
+**Experimento 2: 40.5 min**
 
 ## 5\. Conclusiones y Trabajo Futuro
 
